@@ -60,7 +60,7 @@ def setupSyncService(varName, dirNameVariants):
   if os.path.exists(rootDir):
     config[varName] = rootDir
   else:
-    info("Could not find {} directory.".format(varname))
+    info("Could not find {} directory.".format(varName))
 
 def setupLinks():
   global targetRoot

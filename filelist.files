@@ -1,21 +1,24 @@
+# Game Save files
 $APPDATA/.minecraft/saves
 # TODO don't hard-code the gibberish
 $APPDATA/DarkSoulsII/0110000103d3ca8c
 $APPDATA/DarkSoulsIII/0110000103d3ca8c
 $LOCALAPPDATA/Colossal Order/Cities_Skylines/Saves
-$LOCALAPPDATA/Colossal Order/Cities_Skylines/gameSettings.cgs
-$LOCALAPPDATA/Colossal Order/Cities_Skylines/userGameState.cgs
 # TODO don't hard-code the gibberish
 $HOME/Documents/American Truck Simulator/profiles/416E6472657743617574686F6E/save 
-$HOME/Documents/Dolphin Emulator
-$HOME/Documents/GameMakerStudio2
 $HOME/Documents/BioshockHD/BioShock/SaveGames
 $HOME/Documents/My Games
 $HOME/Documents/NBGI/DarkSouls
 $HOME/Documents/Paradox Interactive/Hearts of Iron IV/save games
-$HOME/Documents/SART
 $HOME/Documents/SimCity/Games
 $HOME/Documents/Square Enix/FINAL FANTASY VII Steam
 $HOME/Documents/Starcraft
 $HOME/Documents/StarCraft II/Saves
 $HOME/Documents/StarCraft II/Replays
+# Game Config files
+$LOCALAPPDATA/Colossal Order/Cities_Skylines/gameSettings.cgs
+$LOCALAPPDATA/Colossal Order/Cities_Skylines/userGameState.cgs
+# Other stuff
+$HOME/Documents/Dolphin Emulator
+$HOME/Documents/GameMakerStudio2
+$HOME/Documents/SART
