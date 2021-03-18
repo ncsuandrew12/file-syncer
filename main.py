@@ -4,20 +4,19 @@ import pathlib
 import shutil
 import subprocess
 
-cGoogleDriveVariants=[ "Google Drive", "Google_Drive", "google-drive" ]
-files=[]
+openFiles=[]
 logFile=None
 targetRoot=None
 config={}
 
 def log(message, important=False):
-  global files
+  global openFiles
   global logFile
   if important:
     print(message)
   if not logFile:
     logFile = open("log.log", "a+")
-    files.insert(0, logFile)
+    openFiles.append(logFile)
     print("", file=logFile)
     print("", file=logFile)
     print("========================================================================================================================", file=logFile)
@@ -76,10 +75,9 @@ def getPath(filePath, isRemoteSubPath):
     raise Exception("Paths must begin with $<var> or a drive letter. Problematic path: {}", filePath)
   return path
 
-listFile = open("filelist.files", "r")
-files.insert(0, listFile)
-try:
-  with open("cfg.json") as cfg:
+def loadConfig(file):
+  global config
+  with open(file) as cfg:
     config = json.load(cfg)
     usernames=[]
     for cfgKey in config:
@@ -88,73 +86,96 @@ try:
     usernames.insert(0, os.getenv("USERNAME"))
     config["Usernames"] = usernames
 
-  gDriveRootDir = None
-  for gdriveRootDirName in cGoogleDriveVariants:
-    gDriveRootDir = getPath("$HOME/Documents/{}".format(gdriveRootDirName), False)
-    if os.path.exists(gDriveRootDir):
+def loadFileList(file):
+  global files
+  files = []
+  with open(file, "r") as listFile:
+    for filePath in listFile:
+      files.append(filePath)
+
+def setupSyncService(varName, dirNameVariants):
+  rootDir = None
+  for rootDirName in dirNameVariants:
+    rootDir = getPath("$HOME/Documents/{}".format(rootDirName), False)
+    if os.path.exists(rootDir):
       break
     for username in config["Usernames"]:
-      if os.path.exists(gDriveRootDir):
+      if os.path.exists(rootDir):
         break
-      gDriveRootDir = "E:/Users/{}/{}".format(username, gdriveRootDirName) # TODO Don't hard-coded the drive letter
-  config["GOOGLEDRIVE"] = gDriveRootDir
+      rootDir = "E:/Users/{}/{}".format(username, rootDirName) # TODO Don't hard-coded the drive letter
+  if os.path.exists(rootDir):
+    config[varName] = rootDir
+  else:
+    info("Could not find {} directory.".format(varname))
 
-  for filePath in listFile:
+def setupSyncServices():
+  setupSyncService("GOOGLEDRIVE", [ "Google Drive", "GoogleDrive", "GDrive", "Google-Drive", "Google_Drive", "google-drive" ])
+
+def setupLink(linkPath, targetPath):
+    debug("{} -> {}".format(linkPath, targetPath))
+    if os.path.islink(linkPath):
+      debug("Skipping {} because it is already a symlink".format(linkPath))
+      return False
+    if not pathlib.Path(linkPath).exists():
+      debug("Skipping {} because it doesn't exist".format(linkPath))
+      return False
+    copyPath = targetPath
+    if pathlib.Path(targetPath).exists():
+      remotePathBak = targetPath
+      i=1
+      while pathlib.Path(remotePathBak).exists():
+        remotePathBak = "{}-bak-{}".format(targetPath, i)
+        i+=1
+      info("{} already exists. Will backup local files to {}".format(targetPath, remotePathBak))
+      copyPath = remotePathBak
+    if os.path.isdir(linkPath):
+      debug("{} is directory".format(linkPath))
+      parentPath = pathlib.Path(copyPath).parent.absolute()
+      if not parentPath.exists():
+        os.makedirs(parentPath)
+      shutil.copytree(linkPath, copyPath)
+      shutil.rmtree(linkPath)
+      info("Linking {} -> {}".format(linkPath, targetPath))
+      mklinkDir(linkPath, targetPath)
+    elif os.path.isfile(linkPath):
+      debug("{} is file".format(linkPath))
+      shutil.copy(linkPath, copyPath)
+      os.remove(linkPath)
+      info("Linking {} -> {}".format(linkPath, targetPath))
+      mklink(linkPath, targetPath)
+    else:
+      err("{} is neither symlink, directory, nor file".format(linkPath))
+      return False
+    return True
+
+def setupLinks():
+  global targetRoot
+  for filePath in files:
     filePath = filePath.rstrip()
     debug("Processing '{}'".format(filePath))
-
     if filePath.startswith("#"):
       debug("Skipping comment line: {}".format(filePath))
       continue;
-
     if not bool(targetRoot):
       targetRoot = getPath(config["TargetDir"], False)
       if not os.path.exists(targetRoot):
         raise Exception("Target root directory does not exist: {}".format(targetRoot))
       continue
-
     localPath = getPath(filePath, False)
     remotePath = getPath(filePath, True)
-
-    debug("{} -> {}".format(localPath, remotePath))
-
-    if os.path.islink(localPath):
-      debug("Skipping {} because it is already a symlink".format(localPath))
+    if not setupLink(localPath, remotePath):
       continue
 
-    if not pathlib.Path(localPath).exists():
-      debug("Skipping {} because it doesn't exist".format(localPath))
-      continue
+def main():
+  loadConfig("cfg.json")
+  loadFileList("filelist.files")
+  setupSyncServices()
+  setupLinks()
 
-    copyPath = remotePath
-    if pathlib.Path(remotePath).exists():
-      remotePathBak = remotePath
-      i=1
-      while pathlib.Path(remotePathBak).exists():
-        remotePathBak = "{}-bak-{}".format(remotePath, i)
-        i+=1
-      info("{} already exists. Will backup local files to {}".format(remotePath, remotePathBak))
-      copyPath = remotePathBak
-
-    if os.path.isdir(localPath):
-      debug("{} is directory".format(localPath))
-      parentPath = pathlib.Path(copyPath).parent.absolute()
-      if not parentPath.exists():
-        os.makedirs(parentPath)
-      shutil.copytree(localPath, copyPath)
-      shutil.rmtree(localPath)
-      info("Linking {} -> {}".format(localPath, remotePath))
-      mklinkDir(localPath, remotePath)
-    elif os.path.isfile(localPath):
-      debug("{} is file".format(localPath))
-      shutil.copy(localPath, copyPath)
-      os.remove(localPath)
-      info("Linking {} -> {}".format(localPath, remotePath))
-      mklink(localPath, remotePath)
-    else:
-      err("{} is neither symlink, directory, nor file".format(localPath))
+try:
+  main()
 finally:
-  for file in files:
+  for file in openFiles:
     try:
       file.close()
     except Exception as e:
