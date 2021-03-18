@@ -16,10 +16,11 @@ config={}
 
 def main():
   try:
-    loadConfig("cfg.json")
+    loadConfig()
     loadFileList("filelist.files")
     setupCustomVars()
     setupSyncServices()
+    debug("config:\n{}".format(json.dumps(config, sort_keys=True, indent=2)))
     setupLinks()
   finally:
     for file in openFiles:
@@ -28,16 +29,23 @@ def main():
       except Exception as e:
         warn(e)
 
-def loadConfig(file):
+def loadConfig():
   global config
-  with open(file) as cfg:
+  with open("cfg.json") as cfg:
     config = json.load(cfg)
-    usernames=[]
-    for cfgKey in config:
-      if cfgKey == "AlternateUserNames":
-        usernames = config[cfgKey]
+  with open("cfg-user.json") as cfg:
+    configUser = json.load(cfg)
+  # Overwrite the defaults with the user's settings
+  for key in configUser:
+    config[key] = configUser[key]
+  usernames=[]
+  for cfgKey in config:
+    if cfgKey == "AlternateUserNames":
+      usernames = config[cfgKey]
+  username = os.getenv("USERNAME")
+  if username not in usernames:
     usernames.insert(0, os.getenv("USERNAME"))
-    config["Usernames"] = usernames
+  config["Usernames"] = usernames.copy()
 
 def loadFileList(file):
   global files
@@ -91,7 +99,6 @@ def finishCustomVarSetup(varName, searchDirs):
   for searchDir in searchDirs:
     if os.path.exists(searchDir):
       config[varName] = searchDir
-      debug("{}: \"{}\"".format(varName, config[varName]))
       break
   if not os.path.exists(config[varName]):
     warn("Could not find {} directory.".format(varName))

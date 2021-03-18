@@ -8,7 +8,11 @@ def log(message, important=False):
   if important:
     print(message)
   if not logFile:
-    logFile = open("log.log", "a+")
+    logDir = "{}/file-syncer/".format(os.getenv("APPDATA"))
+    if not os.path.exists(logDir):
+      os.makedirs(logDir)
+    path = "{}/log.log".format(logDir)
+    logFile = open(path, "a+")
     print("", file=logFile)
     print("", file=logFile)
     print("========================================================================================================================", file=logFile)
