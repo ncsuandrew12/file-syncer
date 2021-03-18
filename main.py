@@ -56,6 +56,18 @@ def setupSyncService(varName, dirNameVariants):
     rootDir = getPath("$HOME/Documents/{}".format(rootDirName), False)
     if os.path.exists(rootDir):
       break
+    rootDir = getPath("{}:/Users/{}/{}".format(os.getenv("HOMEDRIVE"), os.getenv("USERNAME"), rootDirName), False)
+    if os.path.exists(rootDir):
+      break
+    rootDir = getPath("{}:/Users/{}/Documents/{}".format(os.getenv("HOMEDRIVE"), os.getenv("USERNAME"), rootDirName), False)
+    if os.path.exists(rootDir):
+      break
+    rootDir = getPath("{}:/{}".format(os.getenv("HOMEDRIVE"), rootDirName), False)
+    if os.path.exists(rootDir):
+      break
+    rootDir = getPath("{}:/{}".format(os.getenv("SYSTEMDRIVE"), rootDirName), False)
+    if os.path.exists(rootDir):
+      break
     for username in config["Usernames"]:
       if os.path.exists(rootDir):
         break
@@ -97,7 +109,7 @@ def getPath(filePath, isRemoteSubPath):
         if not os.path.exists(path):
           raise Exception("Could not locate {} ({}): {}".format(dirMain, path, subPath))
       elif dirMain == "HOME":
-        path = "{}:{}".format(os.getenv("SYSTEMDRIVE"), os.getenv("HOMEPATH"))
+        path = "{}:{}".format(os.getenv("HOMEDRIVE"), os.getenv("HOMEPATH"))
         for username in config["Usernames"]:
           if os.path.exists(path):
             break
