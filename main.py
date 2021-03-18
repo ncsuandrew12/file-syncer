@@ -3,44 +3,82 @@ import os
 import pathlib
 import shutil
 import subprocess
+from Logging import debug
+from Logging import info
+from Logging import warn
+from Logging import err
 
 openFiles=[]
 logFile=None
 targetRoot=None
 config={}
 
-def log(message, important=False):
-  global openFiles
-  global logFile
-  if important:
-    print(message)
-  if not logFile:
-    logFile = open("log.log", "a+")
-    openFiles.append(logFile)
-    print("", file=logFile)
-    print("", file=logFile)
-    print("========================================================================================================================", file=logFile)
-    print("========================================================================================================================", file=logFile)
-    print("========================================================================================================================", file=logFile)
-  print("{}: {}".format(os.getenv("COMPUTERNAME"), message), file=logFile)
+def main():
+  try:
+    loadConfig("cfg.json")
+    loadFileList("filelist.files")
+    setupSyncServices()
+    setupLinks()
+  finally:
+    for file in openFiles:
+      try:
+        file.close()
+      except Exception as e:
+        warn(e)
 
-def debug(message):
-  log(message)
+def loadConfig(file):
+  global config
+  with open(file) as cfg:
+    config = json.load(cfg)
+    usernames=[]
+    for cfgKey in config:
+      if cfgKey == "AlternateUserNames":
+        usernames = config[cfgKey]
+    usernames.insert(0, os.getenv("USERNAME"))
+    config["Usernames"] = usernames
 
-def info(message):
-  log(message, True)
+def loadFileList(file):
+  global files
+  files = []
+  with open(file, "r") as listFile:
+    for filePath in listFile:
+      files.append(filePath)
 
-def warn(message):
-  log("WARNING: " + message, True)
+def setupSyncServices():
+  setupSyncService("GOOGLEDRIVE", [ "Google Drive", "GoogleDrive", "GDrive", "Google-Drive", "Google_Drive", "google-drive" ])
 
-def err(message):
-  log("ERROR: " + message, True)
+def setupSyncService(varName, dirNameVariants):
+  rootDir = None
+  for rootDirName in dirNameVariants:
+    rootDir = getPath("$HOME/Documents/{}".format(rootDirName), False)
+    if os.path.exists(rootDir):
+      break
+    for username in config["Usernames"]:
+      if os.path.exists(rootDir):
+        break
+      rootDir = "E:/Users/{}/{}".format(username, rootDirName) # TODO Don't hard-coded the drive letter
+  if os.path.exists(rootDir):
+    config[varName] = rootDir
+  else:
+    info("Could not find {} directory.".format(varname))
 
-def mklink(linkPath, targetPath):
-  subprocess.call(["mklink.bat", linkPath, targetPath])
-
-def mklinkDir(linkPath, targetPath):
-  subprocess.call(["mklinkDir.bat", linkPath, targetPath])
+def setupLinks():
+  global targetRoot
+  for filePath in files:
+    filePath = filePath.rstrip()
+    debug("Processing '{}'".format(filePath))
+    if filePath.startswith("#"):
+      debug("Skipping comment line: {}".format(filePath))
+      continue;
+    if not bool(targetRoot):
+      targetRoot = getPath(config["TargetDir"], False)
+      if not os.path.exists(targetRoot):
+        raise Exception("Target root directory does not exist: {}".format(targetRoot))
+      continue
+    localPath = getPath(filePath, False)
+    remotePath = getPath(filePath, True)
+    if not setupLink(localPath, remotePath):
+      continue
 
 def getPath(filePath, isRemoteSubPath):
   dirMain = filePath.split("/")[0]
@@ -74,42 +112,6 @@ def getPath(filePath, isRemoteSubPath):
   else:
     raise Exception("Paths must begin with $<var> or a drive letter. Problematic path: {}", filePath)
   return path
-
-def loadConfig(file):
-  global config
-  with open(file) as cfg:
-    config = json.load(cfg)
-    usernames=[]
-    for cfgKey in config:
-      if cfgKey == "AlternateUserNames":
-        usernames = config[cfgKey]
-    usernames.insert(0, os.getenv("USERNAME"))
-    config["Usernames"] = usernames
-
-def loadFileList(file):
-  global files
-  files = []
-  with open(file, "r") as listFile:
-    for filePath in listFile:
-      files.append(filePath)
-
-def setupSyncService(varName, dirNameVariants):
-  rootDir = None
-  for rootDirName in dirNameVariants:
-    rootDir = getPath("$HOME/Documents/{}".format(rootDirName), False)
-    if os.path.exists(rootDir):
-      break
-    for username in config["Usernames"]:
-      if os.path.exists(rootDir):
-        break
-      rootDir = "E:/Users/{}/{}".format(username, rootDirName) # TODO Don't hard-coded the drive letter
-  if os.path.exists(rootDir):
-    config[varName] = rootDir
-  else:
-    info("Could not find {} directory.".format(varname))
-
-def setupSyncServices():
-  setupSyncService("GOOGLEDRIVE", [ "Google Drive", "GoogleDrive", "GDrive", "Google-Drive", "Google_Drive", "google-drive" ])
 
 def setupLink(linkPath, targetPath):
     debug("{} -> {}".format(linkPath, targetPath))
@@ -148,35 +150,10 @@ def setupLink(linkPath, targetPath):
       return False
     return True
 
-def setupLinks():
-  global targetRoot
-  for filePath in files:
-    filePath = filePath.rstrip()
-    debug("Processing '{}'".format(filePath))
-    if filePath.startswith("#"):
-      debug("Skipping comment line: {}".format(filePath))
-      continue;
-    if not bool(targetRoot):
-      targetRoot = getPath(config["TargetDir"], False)
-      if not os.path.exists(targetRoot):
-        raise Exception("Target root directory does not exist: {}".format(targetRoot))
-      continue
-    localPath = getPath(filePath, False)
-    remotePath = getPath(filePath, True)
-    if not setupLink(localPath, remotePath):
-      continue
+def mklink(linkPath, targetPath):
+  subprocess.call(["mklink.bat", linkPath, targetPath])
 
-def main():
-  loadConfig("cfg.json")
-  loadFileList("filelist.files")
-  setupSyncServices()
-  setupLinks()
+def mklinkDir(linkPath, targetPath):
+  subprocess.call(["mklinkDir.bat", linkPath, targetPath])
 
-try:
-  main()
-finally:
-  for file in openFiles:
-    try:
-      file.close()
-    except Exception as e:
-      warn(e)
+main()
