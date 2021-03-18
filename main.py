@@ -50,6 +50,9 @@ def setupSyncServices():
 def setupSyncService(varName, dirNameVariants):
   rootDir = None
   for rootDirName in dirNameVariants:
+    rootDir = getPath("$HOME/{}".format(rootDirName), False)
+    if os.path.exists(rootDir):
+      break
     rootDir = getPath("$HOME/Documents/{}".format(rootDirName), False)
     if os.path.exists(rootDir):
       break
