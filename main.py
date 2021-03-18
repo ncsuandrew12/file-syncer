@@ -49,29 +49,22 @@ def setupSyncServices():
 
 def setupSyncService(varName, dirNameVariants):
   rootDir = None
+  searchDirs = []
   for rootDirName in dirNameVariants:
-    rootDir = getPath("$HOME/{}".format(rootDirName), False)
+    searchDirs.append(getPath("$HOME", False))
+    searchDirs.append(getPath("$HOME/Documents", False))
+    searchDirs.append(getPath("{}:/Users/{}".format(os.getenv("HOMEDRIVE"), os.getenv("USERNAME")), False))
+    searchDirs.append(getPath("{}:/Users/{}/Documents".format(os.getenv("HOMEDRIVE"), os.getenv("USERNAME")), False))
+    searchDirs.append(getPath("{}:".format(os.getenv("HOMEDRIVE")), False))
+    searchDirs.append(getPath("{}:".format(os.getenv("SYSTEMDRIVE")), False))
+    for driveLetter in string.ascii_uppercase:
+      searchDirs.append(getPath("{}:".format(driveLetter), False))
+      for username in config["Usernames"]:
+        searchDirs.append(getPath("{}:/Users/{}".format(driveLetter, username), False))
+  for searchDir in searchDirs:
+    rootDir = "{}/{}".format(searchDir, rootDirName)
     if os.path.exists(rootDir):
       break
-    rootDir = getPath("$HOME/Documents/{}".format(rootDirName), False)
-    if os.path.exists(rootDir):
-      break
-    rootDir = getPath("{}:/Users/{}/{}".format(os.getenv("HOMEDRIVE"), os.getenv("USERNAME"), rootDirName), False)
-    if os.path.exists(rootDir):
-      break
-    rootDir = getPath("{}:/Users/{}/Documents/{}".format(os.getenv("HOMEDRIVE"), os.getenv("USERNAME"), rootDirName), False)
-    if os.path.exists(rootDir):
-      break
-    rootDir = getPath("{}:/{}".format(os.getenv("HOMEDRIVE"), rootDirName), False)
-    if os.path.exists(rootDir):
-      break
-    rootDir = getPath("{}:/{}".format(os.getenv("SYSTEMDRIVE"), rootDirName), False)
-    if os.path.exists(rootDir):
-      break
-    for username in config["Usernames"]:
-      if os.path.exists(rootDir):
-        break
-      rootDir = "E:/Users/{}/{}".format(username, rootDirName) # TODO Don't hard-coded the drive letter
   if os.path.exists(rootDir):
     config[varName] = rootDir
   else:
