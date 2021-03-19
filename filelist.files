@@ -1,15 +1,14 @@
 # Game Save files
 # TODO make a variable for the Documents directory
-# TODO don't hard-code the gibberish
-$HOME/Documents/American Truck Simulator/profiles/416E6472657743617574686F6E/save 
-$HOME/Documents/BioshockHD/BioShock/SaveGames
-$HOME/Documents/NBGI/DarkSouls
-$HOME/Documents/Paradox Interactive/Hearts of Iron IV/save games
-$HOME/Documents/SimCity/Games
-$HOME/Documents/Square Enix/FINAL FANTASY VII Steam
-$HOME/Documents/Starcraft
-$HOME/Documents/StarCraft II/Saves
-$HOME/Documents/StarCraft II/Replays
+$DOCUMENTS/American Truck Simulator/profiles/
+$DOCUMENTS/BioshockHD/BioShock/SaveGames
+$DOCUMENTS/NBGI/DarkSouls
+$DOCUMENTS/Paradox Interactive/Hearts of Iron IV/save games
+$DOCUMENTS/SimCity/Games
+$DOCUMENTS/Square Enix/FINAL FANTASY VII Steam
+$DOCUMENTS/Starcraft
+$DOCUMENTS/StarCraft II/Saves
+$DOCUMENTS/StarCraft II/Replays
 $APPDATA/.minecraft/saves
 $APPDATA/Factorio/saves
 # TODO don't hard-code the gibberish
@@ -22,9 +21,9 @@ $APPDATA/Factorio/config
 $LOCALAPPDATA/Colossal Order/Cities_Skylines/gameSettings.cgs
 $LOCALAPPDATA/Colossal Order/Cities_Skylines/userGameState.cgs
 # Other stuff
-$HOME/Documents/My Games
-$HOME/Documents/Dolphin Emulator
-$HOME/Documents/GameMakerStudio2
-$HOME/Documents/SART
+$DOCUMENTS/My Games
+$DOCUMENTS/Dolphin Emulator
+$DOCUMENTS/GameMakerStudio2
+$DOCUMENTS/SART
 $APPDATA/Factorio/mods
 $APPDATALOCALLOW/Innersloth/Among Us/playerStats2

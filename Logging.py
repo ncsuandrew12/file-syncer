@@ -8,11 +8,16 @@ def log(message, important=False):
   if important:
     print(message)
   if not logFile:
-    logDir = "{}/file-syncer/".format(os.getenv("APPDATA"))
+    logDir = "{}/Users/{}/file-syncer".format(os.getenv("HOMEDRIVE"), os.getenv("USERNAME"))
     if not os.path.exists(logDir):
+      print("Making logDir: " + logDir)
       os.makedirs(logDir)
     path = "{}/log.log".format(logDir)
-    logFile = open(path, "a+")
+    if os.path.exists(path):
+      logFile = open(path, "a+")
+    else:
+      logFile = open(path, "w")
+    print("Logging to file: \"{}\"".format(path))
     print("", file=logFile)
     print("", file=logFile)
     print("========================================================================================================================", file=logFile)

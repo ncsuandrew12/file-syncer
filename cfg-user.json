@@ -1,8 +1,10 @@
 {
-  "AlternateUserNames": [
-    "afelsher",
-    "andrew",
-    "ncsua"
-  ],
+  "AllUsers": false,
+  "UserNameAliases": {
+    "ncsua": [
+      "afelsher",
+      "andrew"
+    ]
+  },
   "TargetDir": "$GOOGLEDRIVE/windows-data/synced"
 }
