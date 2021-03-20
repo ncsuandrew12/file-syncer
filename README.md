@@ -18,6 +18,10 @@ TODOs:
 
 -Add convenience searches for additional cloud storage services: OneDrive, Dropbox.
 
+-Add support for Linux.
+
 -Package as an executable/service?
 
 -Set up a schedule automatically?
+
+-Derive list of disks from Windows instead of brute-forcing all possible drive letters.
