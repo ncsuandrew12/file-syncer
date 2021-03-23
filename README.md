@@ -1,5 +1,5 @@
 # file-syncer
-Python scripts for synchronizing files (namely game save files) across multiple computers using a standard cloud storage
+Python scripts for synchronizing files (namely game save files) across multiple computers using a standard file synchronization
 service.
 
 If you don't have Python 3 installed, install it (for free) from the Windows Store: https://www.microsoft.com/store/productId/9P7QFQMJRFP7
