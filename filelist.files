@@ -21,9 +21,11 @@ $APPDATA/Factorio/config
 $LOCALAPPDATA/Colossal Order/Cities_Skylines/gameSettings.cgs
 $LOCALAPPDATA/Colossal Order/Cities_Skylines/userGameState.cgs
 # Other stuff
+$APPDATA/Factorio/mods
+$APPDATALOCALLOW/Innersloth/Among Us/playerStats2
 $DOCUMENTS/My Games
 $DOCUMENTS/Dolphin Emulator
 $DOCUMENTS/GameMakerStudio2
 $DOCUMENTS/SART
-$APPDATA/Factorio/mods
-$APPDATALOCALLOW/Innersloth/Among Us/playerStats2
+$MUSIC/Amazon Music
+$MUSIC/iTunes/iTunes Media
